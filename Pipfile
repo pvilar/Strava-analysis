@@ -15,6 +15,7 @@ polyline = "*"
 matplotlib = "*"
 basemap = {file = "https://github.com/matplotlib/basemap/archive/master.zip"}
 ipykernel = "*"
+streamlit = "*"
 
 [requires]
 python_version = "3.8"

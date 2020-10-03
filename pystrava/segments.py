@@ -1,5 +1,7 @@
 """ Functions for segments analysis """
 
+import sys
+
 import pandas as pd
 import requests
 import re
@@ -10,7 +12,11 @@ def sort_segments_from_activity(activity_id, gender, strava_tokens):
     # get segments from activity
     df_segments = _get_segments_from_activity(activity_id, strava_tokens)
 
+    # filtering 10 random segments to avoid eceeding the rate limit (remove in production)
+    df_segments = df_segments.sample(n=10)
+
     # calculate delta from leader
+    print("Sorting segments...")
     df_segments["segment_time_delta"] = df_segments.apply(
         lambda x: _calculate_time_difference_from_leader(x["segment.id"],
                                                          x["elapsed_time"],
@@ -21,6 +27,7 @@ def sort_segments_from_activity(activity_id, gender, strava_tokens):
 
     # sort dataframe
     df_segments.sort_values(by=['segment_time_delta'], inplace=True)
+    print("Sorting segments...done!")
 
     return df_segments
 
@@ -29,6 +36,9 @@ def _check_rate_limit_exceeded(req):
 
     if "message" in req:
         print(req['message'])
+
+        if req['message'] == "Rate Limit Exceeded":
+            sys.exit("Reached the Strava requests limit, stopping execution")
 
 
 def _get_segments_from_activity(activity_id, strava_tokens):
@@ -51,6 +61,8 @@ def _get_segments_from_activity(activity_id, strava_tokens):
 
     # check if rate limit is exceeded
     _check_rate_limit_exceeded(req)
+
+    print("Segments loaded successfully")
 
     return pd.json_normalize(req['segment_efforts'])
 
