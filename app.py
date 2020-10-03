@@ -1,10 +1,13 @@
 import os
+import requests
 
 # import plotly.express as px
 import streamlit as st
+import polyline
+import pandas as pd
 
 from pystrava.utils import get_tokens
-from pystrava.segments import sort_segments_from_activity
+from pystrava.segments import _check_rate_limit_exceeded, sort_segments_from_activity
 
 
 def main():
@@ -15,11 +18,18 @@ def main():
     # get tokens
     strava_tokens = get_tokens(CLIENT_ID, CLIENT_SECRET, TOKENS_FILEPATH)
 
+    # TODO: select activity from date?
     # get activity id from user input
-    ACTIVITY_ID = st.text_input("Enter an activity id from your trainings")
+    ACTIVITY_ID = st.text_input("Enter an activity id from your trainings",
+                                '4074378152')  # remove default activity id in production
     if not ACTIVITY_ID:
         st.warning('Please input a valid activity id from your profile')
         st.stop()
+
+    # display map from activity
+    df_activity_coordinates = get_activity_coordinates(ACTIVITY_ID, strava_tokens)
+    st.header("Activity map")
+    st.map(df_activity_coordinates)
 
     # returns the sorted segments by time delta
     # @st.cache
@@ -27,6 +37,7 @@ def main():
     # strava_tokens)
     df_segments = call_segments_sorting(ACTIVITY_ID, strava_tokens)
 
+    # TODO: format segments dataframe to show only valuable information
     # displays the segments dataframe with a checkbox to select on the
     # distance of the segment
     st.header("Ranked segments by proximity to Strava leader")
@@ -34,6 +45,76 @@ def main():
                             range(0, int(max(df_segments['distance']/1000))))
     df_segments_filtered = df_segments[df_segments['distance']/1000 >= distance]
     st.write(df_segments_filtered)
+
+    # select segment to analyse
+    segment_name = st.selectbox("Select a segment to visualize",
+                                df_segments_filtered["name"].unique())
+
+    # get segment id from name
+    segment_id = df_segments_filtered.loc[
+                        df_segments_filtered['name'] == segment_name,
+                        'segment.id'].values[0]
+
+    # display segment map
+    df_segment_coordinates = get_segment_coordinates(str(segment_id), strava_tokens)
+    st.header("Segment map")
+    st.map(df_segment_coordinates)
+
+
+def get_activity_coordinates(activity_id, strava_tokens):
+
+    # store URL for activities endpoint
+    base_url = "https://www.strava.com/api/v3/"
+    endpoint = "activities/{}".format(activity_id)
+    url = base_url + endpoint
+
+    # access token
+    access_token = strava_tokens['access_token']
+
+    # define headers and parameters for request
+    headers = {"Authorization": "Bearer {}".format(access_token)}
+
+    # make GET request to Strava API
+    req = requests.get(url, headers=headers).json()
+
+    # check if rate limit is exceeded
+    _check_rate_limit_exceeded(req)
+
+    # activity polyline
+    activity_polyline = req['map']["polyline"]
+
+    # coordinates = polyline.decode(activity_polyline)
+    coordinates = polyline.decode(activity_polyline)
+
+    return pd.DataFrame(coordinates, columns=["latitude", "longitude"])
+
+
+def get_segment_coordinates(segment_id, strava_tokens):
+
+    # store URL for activities endpoint
+    base_url = "https://www.strava.com/api/v3/"
+    endpoint = "segments/{}".format(segment_id)
+    url = base_url + endpoint
+
+    # access token
+    access_token = strava_tokens['access_token']
+
+    # define headers and parameters for request
+    headers = {"Authorization": "Bearer {}".format(access_token)}
+
+    # make GET request to Strava API
+    req = requests.get(url, headers=headers).json()
+
+    # check if rate limit is exceeded
+    _check_rate_limit_exceeded(req)
+
+    # segment polyline
+    segment_polyline = req['map']["polyline"]
+
+    # coordinates = polyline.decode(activity_polyline)
+    coordinates = polyline.decode(segment_polyline)
+
+    return pd.DataFrame(coordinates, columns=["latitude", "longitude"])
 
 
 # This functions calls the function that sorts the segments from the pystrava
