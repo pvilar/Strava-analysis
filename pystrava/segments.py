@@ -12,7 +12,8 @@ def sort_segments_from_activity(activity_id, gender, strava_tokens):
     # get segments from activity
     df_segments = _get_segments_from_activity(activity_id, strava_tokens)
 
-    # filtering 10 random segments to avoid eceeding the rate limit (remove in production)
+    # filtering 10 random segments to avoid eceeding the rate limit (remove
+    # in production)
     df_segments = df_segments.sample(n=10)
 
     # calculate delta from leader
