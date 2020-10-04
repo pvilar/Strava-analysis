@@ -1,5 +1,7 @@
 import os
 import requests
+import webbrowser
+import re
 
 # import plotly.express as px
 import streamlit as st
@@ -15,13 +17,25 @@ def main():
     st.title("Be The Next Strava Leader")
     st.markdown("Further description")
 
+    # Link to app's OAuth Authorization page
+    url_oauth = 'https://www.strava.com/oauth/authorize?client_id=%2053827&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=profile:read_all,activity:read_all'
+    if st.button('Authorize SegmentBreaker to connect to your Strava'):
+        webbrowser.open_new_tab(url_oauth)
+
+    # Text box to input URL from auth
+    url_code = st.text_input("Enter the URL you got after authorizing the app to access your training data")
+    if not url_code:
+        st.stop()
+    code = re.search('code=(.*)&', url_code).group(1)
+    print(code)
+
     # get tokens
-    strava_tokens = get_tokens(CLIENT_ID, CLIENT_SECRET, TOKENS_FILEPATH)
+    strava_tokens = get_tokens(CLIENT_ID, CLIENT_SECRET, TOKENS_FILEPATH, code)
 
     # TODO: select activity from date?
     # get activity id from user input
-    ACTIVITY_ID = st.text_input("Enter an activity id from your trainings",
-                                '4074378152')  # remove default activity id in production
+    ACTIVITY_ID = st.text_input("Enter an activity id from your trainings")#,
+                                # '4074378152')  # remove default activity id in production
     if not ACTIVITY_ID:
         st.warning('Please input a valid activity id from your profile')
         st.stop()
