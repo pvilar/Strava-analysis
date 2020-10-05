@@ -3,9 +3,13 @@
 ### How to run web app
 
 Clone the repository, activate the virtual environment and run the app script
-```python
+```bash
 pipenv shell
 streamlit run app.py
+```
+or
+```bash
+pipenv run streamlit run app.py
 ```
 
 ### TODO
