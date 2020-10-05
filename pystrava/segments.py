@@ -1,16 +1,18 @@
 """ Functions for segments analysis """
 
-import sys
-
-import pandas as pd
+import os
 import requests
 import re
 
+import pandas as pd
 
-def sort_segments_from_activity(activity_id, gender, strava_tokens):
+from pystrava.utils import check_rate_limit_exceeded, refresh_access_token_if_expired
+
+
+def sort_segments_from_activity(activity_id, gender):
 
     # get segments from activity
-    df_segments = _get_segments_from_activity(activity_id, strava_tokens)
+    df_segments = _get_segments_from_activity(activity_id)
 
     # filtering 10 random segments to avoid eceeding the rate limit (remove
     # in production)
@@ -21,8 +23,7 @@ def sort_segments_from_activity(activity_id, gender, strava_tokens):
     df_segments["segment_time_delta"] = df_segments.apply(
         lambda x: _calculate_time_difference_from_leader(x["segment.id"],
                                                          x["elapsed_time"],
-                                                         gender=gender,
-                                                         strava_tokens=strava_tokens
+                                                         gender=gender
                                                          ),
         axis=1)
 
@@ -33,16 +34,7 @@ def sort_segments_from_activity(activity_id, gender, strava_tokens):
     return df_segments
 
 
-def _check_rate_limit_exceeded(req):
-
-    if "message" in req:
-        print(req['message'])
-
-        if req['message'] == "Rate Limit Exceeded":
-            sys.exit("Reached the Strava requests limit, stopping execution")
-
-
-def _get_segments_from_activity(activity_id, strava_tokens):
+def _get_segments_from_activity(activity_id):
 
     print("Loading segments")
 
@@ -51,17 +43,15 @@ def _get_segments_from_activity(activity_id, strava_tokens):
     endpoint = "activities/{}".format(activity_id)
     url = base_url + endpoint
 
-    # access token
-    access_token = strava_tokens['access_token']
-
     # define headers and parameters for request
-    headers = {"Authorization": "Bearer {}".format(access_token)}
+    refresh_access_token_if_expired()
+    headers = {"Authorization": "Bearer {}".format(os.getenv("ACCESS_TOKEN"))}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
 
     # check if rate limit is exceeded
-    _check_rate_limit_exceeded(req)
+    check_rate_limit_exceeded(req)
 
     print("Segments loaded successfully")
 
@@ -83,7 +73,7 @@ def _get_sec(time_str):
 
 
 def _calculate_time_difference_from_leader(segment_id, athlete_elapsed_time,
-                                           gender, strava_tokens):
+                                           gender):
     """
     Gets the time of the segment's leader in seconds and calculates
     the percent difference from the anthlete time
@@ -94,17 +84,15 @@ def _calculate_time_difference_from_leader(segment_id, athlete_elapsed_time,
     endpoint = "segments/{}".format(segment_id)
     url = base_url + endpoint
 
-    # access token
-    access_token = strava_tokens['access_token']
-
     # define headers and parameters for request
-    headers = {"Authorization": "Bearer {}".format(access_token)}
+    refresh_access_token_if_expired()
+    headers = {"Authorization": "Bearer {}".format(os.getenv("ACCESS_TOKEN"))}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
 
     # check if rate limit is exceeded
-    _check_rate_limit_exceeded(req)
+    check_rate_limit_exceeded(req)
 
     # get leader time
     leader_elapsed_time = _get_sec(
