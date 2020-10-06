@@ -12,14 +12,14 @@ from pystrava.transformations import get_segment_coordinates, get_activity_coord
 
 def main():
     # Display title and any other information at the top
-    st.title("Be The Next Strava Leader")
-    st.markdown("Further description")
+    st.title("SegmentBreaker")
+    st.markdown("## Be The Next Strava Leader")
 
     # Link to app's OAuth Authorization page
     url_oauth = 'https://www.strava.com/oauth/authorize?client_id=%2053827&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=profile:read_all,activity:read_all'
     # if st.button('Authorize SegmentBreaker to connect to your Strava'):
         # webbrowser.open_new_tab(url_oauth)
-    st.markdown("Copy the following URL and open it in your browser in order to authorise SegmentBreaker to connect to your Strava")
+    st.markdown("Click on the following link in order to authorise SegmentBreaker to connect to your Strava")
     st.markdown(url_oauth)
 
     # Text box to input URL from auth
