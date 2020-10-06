@@ -6,15 +6,9 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-jupyter = "*"
 requests = "*"
-autopep8 = "*"
-yapf = "*"
 pandas = "*"
 polyline = "*"
-matplotlib = "*"
-basemap = {file = "https://github.com/matplotlib/basemap/archive/master.zip"}
-ipykernel = "*"
 streamlit = "*"
 
 [requires]
