@@ -5,7 +5,7 @@ import re
 # import plotly.express as px
 import streamlit as st
 
-from pystrava.utils import get_first_time_token, refresh_access_token_if_expired
+from pystrava.utils import get_first_time_token
 from pystrava.segments import sort_segments_from_activity
 from pystrava.transformations import get_segment_coordinates, get_activity_coordinates
 
