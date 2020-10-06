@@ -17,8 +17,10 @@ def main():
 
     # Link to app's OAuth Authorization page
     url_oauth = 'https://www.strava.com/oauth/authorize?client_id=%2053827&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=profile:read_all,activity:read_all'
-    if st.button('Authorize SegmentBreaker to connect to your Strava'):
-        webbrowser.open_new_tab(url_oauth)
+    # if st.button('Authorize SegmentBreaker to connect to your Strava'):
+        # webbrowser.open_new_tab(url_oauth)
+    st.markdown("Copy the following URL and open it in your browser in order to authorise SegmentBreaker to connect to your Strava")
+    st.markdown(url_oauth)
 
     # Text box to input URL from auth
     oauth_response = st.text_input("Enter the URL you got after authorizing the app to access your training data")
