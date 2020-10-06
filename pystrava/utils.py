@@ -15,6 +15,8 @@ def get_first_time_token():
     if not os.getenv("ACCESS_TOKEN"):
 
         print("code inside get_first_time_token function: " + os.getenv("CODE"))  # remove
+        print("client code inside function: "+str(CLIENT_ID))
+        print("client secret inside function: "+str(CLIENT_SECRET))
 
         # Make Strava auth API call with URL code from OAuth Authorization page
         response = requests.post(
