@@ -1,16 +1,12 @@
 # Strava-analysis
 
-### How to run web app
+### How to run web app locally
 
 Clone the repository, activate the virtual environment and run the app script
-```bash
-pipenv shell
-streamlit run app.py
-```
-or
 ```bash
 pipenv run streamlit run app.py
 ```
 
 ### TODO
-* create and add setup.sh script that installs pipenv, packages and activates shell
+* create and add setup script that installs pipenv and requirements
+* how to run locally with Heroku
