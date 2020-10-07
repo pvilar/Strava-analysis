@@ -1,18 +1,17 @@
 """ Functions for segments analysis """
 
-import os
 import requests
 import re
 
 import pandas as pd
 
-from pystrava.utils import check_rate_limit_exceeded, refresh_access_token_if_expired
+from pystrava.utils import check_rate_limit_exceeded
 
 
-def sort_segments_from_activity(activity_id, gender):
+def sort_segments_from_activity(activity_id, gender, tokens):
 
     # get segments from activity
-    df_segments = _get_segments_from_activity(activity_id)
+    df_segments = _get_segments_from_activity(activity_id, tokens)
 
     # filtering 10 random segments to avoid eceeding the rate limit (remove
     # in production)
@@ -21,10 +20,8 @@ def sort_segments_from_activity(activity_id, gender):
     # calculate delta from leader
     print("Sorting segments...")
     df_segments["segment_time_delta"] = df_segments.apply(
-        lambda x: _calculate_time_difference_from_leader(x["segment.id"],
-                                                         x["elapsed_time"],
-                                                         gender=gender
-                                                         ),
+        lambda x: _calculate_time_difference_from_leader(
+            x["segment.id"], x["elapsed_time"], gender=gender),
         axis=1)
 
     # sort dataframe
@@ -34,7 +31,7 @@ def sort_segments_from_activity(activity_id, gender):
     return df_segments
 
 
-def _get_segments_from_activity(activity_id):
+def _get_segments_from_activity(activity_id, tokens):
 
     print("Loading segments")
 
@@ -44,8 +41,7 @@ def _get_segments_from_activity(activity_id):
     url = base_url + endpoint
 
     # define headers and parameters for request
-    refresh_access_token_if_expired()
-    headers = {"Authorization": "Bearer {}".format(os.getenv("ACCESS_TOKEN"))}
+    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
@@ -73,7 +69,7 @@ def _get_sec(time_str):
 
 
 def _calculate_time_difference_from_leader(segment_id, athlete_elapsed_time,
-                                           gender):
+                                           gender, tokens):
     """
     Gets the time of the segment's leader in seconds and calculates
     the percent difference from the anthlete time
@@ -85,8 +81,7 @@ def _calculate_time_difference_from_leader(segment_id, athlete_elapsed_time,
     url = base_url + endpoint
 
     # define headers and parameters for request
-    refresh_access_token_if_expired()
-    headers = {"Authorization": "Bearer {}".format(os.getenv("ACCESS_TOKEN"))}
+    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
@@ -96,6 +91,7 @@ def _calculate_time_difference_from_leader(segment_id, athlete_elapsed_time,
 
     # get leader time
     leader_elapsed_time = _get_sec(
-        req['xoms']['qom']) if gender == 'women' else _get_sec(req['xoms']['kom'])
+        req['xoms']['qom']) if gender == 'women' else _get_sec(
+            req['xoms']['kom'])
 
     return athlete_elapsed_time / leader_elapsed_time - 1

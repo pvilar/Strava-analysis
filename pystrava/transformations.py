@@ -1,16 +1,14 @@
 """ Functions for working with coordinates """
 
-import os
 import requests
 
 import pandas as pd
 import polyline
 
-from pystrava.utils import refresh_access_token_if_expired
-from pystrava.segments import check_rate_limit_exceeded
+from pystrava.utils import check_rate_limit_exceeded
 
 
-def get_activity_coordinates(activity_id):
+def get_activity_coordinates(activity_id, tokens):
 
     # store URL for activities endpoint
     base_url = "https://www.strava.com/api/v3/"
@@ -18,8 +16,7 @@ def get_activity_coordinates(activity_id):
     url = base_url + endpoint
 
     # define headers and parameters for request
-    refresh_access_token_if_expired()
-    headers = {"Authorization": "Bearer {}".format(os.getenv("ACCESS_TOKEN"))}
+    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
@@ -36,7 +33,7 @@ def get_activity_coordinates(activity_id):
     return pd.DataFrame(coordinates, columns=["latitude", "longitude"])
 
 
-def get_segment_coordinates(segment_id):
+def get_segment_coordinates(segment_id, tokens):
 
     # store URL for activities endpoint
     base_url = "https://www.strava.com/api/v3/"
@@ -44,8 +41,7 @@ def get_segment_coordinates(segment_id):
     url = base_url + endpoint
 
     # define headers and parameters for request
-    refresh_access_token_if_expired()
-    headers = {"Authorization": "Bearer {}".format(os.getenv("ACCESS_TOKEN"))}
+    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
