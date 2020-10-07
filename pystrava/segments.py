@@ -8,7 +8,7 @@ import pandas as pd
 from pystrava.utils import check_rate_limit_exceeded
 
 
-def sort_segments_from_activity(activity_id, gender, tokens):
+def sort_segments_from_activity(tokens, activity_id, gender):
 
     # get segments from activity
     df_segments = _get_segments_from_activity(activity_id, tokens)

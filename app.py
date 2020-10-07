@@ -91,9 +91,9 @@ def main():
 # needs to be defined in this script (so it's a workaround to use sort_segments_from_activity() cached  # noqa: E302, E501
 @st.cache
 def call_segments_sorting(ACTIVITY_ID, tokens):
-    return sort_segments_from_activity(activity_id=ACTIVITY_ID,
-                                       gender=GENDER,
-                                       tokens)
+    return sort_segments_from_activity(tokens,
+                                       activity_id=ACTIVITY_ID,
+                                       gender=GENDER)
 
 
 # General parameters
