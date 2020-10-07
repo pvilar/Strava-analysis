@@ -16,7 +16,7 @@ def get_activity_coordinates(activity_id, tokens):
     url = base_url + endpoint
 
     # define headers and parameters for request
-    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
+    headers = {"Authorization": "Bearer {}".format(tokens["access_token"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
@@ -41,7 +41,7 @@ def get_segment_coordinates(segment_id, tokens):
     url = base_url + endpoint
 
     # define headers and parameters for request
-    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
+    headers = {"Authorization": "Bearer {}".format(tokens["access_token"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()

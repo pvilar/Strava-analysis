@@ -15,13 +15,13 @@ def sort_segments_from_activity(tokens, activity_id, gender):
 
     # filtering 10 random segments to avoid eceeding the rate limit (remove
     # in production)
-    df_segments = df_segments.sample(n=10)
+    # df_segments = df_segments.sample(n=10)  # TODO: remove limit
 
     # calculate delta from leader
     print("Sorting segments...")
     df_segments["segment_time_delta"] = df_segments.apply(
         lambda x: _calculate_time_difference_from_leader(
-            x["segment.id"], x["elapsed_time"], gender=gender),
+            x["segment.id"], x["elapsed_time"], gender=gender, tokens=tokens),
         axis=1)
 
     # sort dataframe
@@ -41,7 +41,7 @@ def _get_segments_from_activity(activity_id, tokens):
     url = base_url + endpoint
 
     # define headers and parameters for request
-    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
+    headers = {"Authorization": "Bearer {}".format(tokens["access_token"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
@@ -81,7 +81,7 @@ def _calculate_time_difference_from_leader(segment_id, athlete_elapsed_time,
     url = base_url + endpoint
 
     # define headers and parameters for request
-    headers = {"Authorization": "Bearer {}".format(tokens["ACCESS_TOKEN"])}
+    headers = {"Authorization": "Bearer {}".format(tokens["access_token"])}
 
     # make GET request to Strava API
     req = requests.get(url, headers=headers).json()
@@ -94,4 +94,4 @@ def _calculate_time_difference_from_leader(segment_id, athlete_elapsed_time,
         req['xoms']['qom']) if gender == 'women' else _get_sec(
             req['xoms']['kom'])
 
-    return athlete_elapsed_time / leader_elapsed_time - 1
+    return athlete_elapsed_time / leader_elapsed_time
