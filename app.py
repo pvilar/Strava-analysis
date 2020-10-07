@@ -33,10 +33,6 @@ def main():
     # Set code as environment variable
     # os.environ["CODE"] = url_code
 
-    # get tokens
-    tokens = get_first_time_token(CODE)
-    print("access token in app: " + tokens['access_token'])
-
     # TODO: select activity from date?
     # get activity id from user input
     ACTIVITY_ID = st.text_input(
@@ -47,6 +43,9 @@ def main():
         st.warning('Please input a valid activity id from your profile')
         # st.stop()
     else:
+        # get tokens
+        tokens = get_first_time_token(CODE)  # only need to call this once!
+        print("access token in app: " + tokens['access_token'])
 
         # Refresh tokens if expired
         tokens = refresh_access_token_if_expired(tokens)
