@@ -55,7 +55,7 @@ def main():
             df_activity_coordinates = get_activity_coordinates(ACTIVITY_ID, tokens)
             st.header("Activity map")
             # st.map(df_activity_coordinates)
-            activity_map = create_map(df_activity_coordinates)
+            activity_map = create_map(df_activity_coordinates, 'dark')
             st.pydeck_chart(activity_map)
 
             # returns the sorted segments by time delta
@@ -85,7 +85,9 @@ def main():
             df_segment_coordinates = get_segment_coordinates(
                 str(segment_id), tokens)
             st.header("Segment map")
-            st.map(df_segment_coordinates)
+            # st.map(df_segment_coordinates)
+            segment_map = create_map(df_segment_coordinates, 'outdoors')
+            st.pydeck_chart(segment_map)
 
 
 @st.cache

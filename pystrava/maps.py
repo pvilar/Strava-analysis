@@ -5,9 +5,10 @@ import pandas as pd
 import numpy as np
 
 
-def create_map(df_coordinates: pd.DataFrame):
+def create_map(df_coordinates: pd.DataFrame, map_style: str = 'light'):
     """
     :param df_coordinates: dataframe containing longitudes and latitudes
+    :param map_style: string that defines MapBox style, can be light, dark, streets, outdoors, satellite
     :return: Deck object
     """
 
@@ -54,10 +55,19 @@ def create_map(df_coordinates: pd.DataFrame):
         )
     ]
 
-    r = pdk.Deck(
-        layers=layers,
-        initial_view_state=view_state,
-        tooltip={"text": "{name}"})
+    map_style_dict = {
+        'light': "light-v9",
+        'dark': "dark-v10",
+        'streets': "streets-v11",
+        'outdoors': "outdoors-v11",
+        'satellite': "satellite-streets-v11"
+    }
+
+    r = pdk.Deck(map_style="mapbox://styles/mapbox/{}".format(
+        map_style_dict[map_style]),
+                 layers=layers,
+                 initial_view_state=view_state,
+                 tooltip={"text": "{name}"})
 
     return (r)
 
