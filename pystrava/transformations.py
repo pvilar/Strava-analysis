@@ -1,11 +1,14 @@
 """ Functions for working with coordinates """
 
 import requests
+import logging
 
 import pandas as pd
 import polyline
 
 from pystrava.utils import check_rate_limit_exceeded
+
+logger = logging.getLogger("pystrava")
 
 
 def get_activity_coordinates(activity_id, tokens):
