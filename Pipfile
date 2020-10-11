@@ -10,6 +10,7 @@ requests = "*"
 pandas = "*"
 polyline = "*"
 streamlit = "*"
+pydeck = "*"
 
 [requires]
 python_version = "3.8"

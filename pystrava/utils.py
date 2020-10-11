@@ -4,9 +4,12 @@ import os
 import requests
 import time
 import sys
+import logging
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
+logger = logging.getLogger("pystrava")
 
 
 def get_first_time_token(CODE):
@@ -58,7 +61,25 @@ def refresh_access_token_if_expired(tokens):
 def check_rate_limit_exceeded(req):
 
     if "message" in req:
-        print(req['message'])
+        logger.info(req['message'])
 
         if req['message'] == "Rate Limit Exceeded":
             sys.exit("Reached the Strava requests limit, stopping execution")
+
+
+def set_logger(name: str = "pystrava") -> logging.Logger:
+    """
+    Returns a formatted logger to use in scripts.
+    Args
+      name: The name of the logger
+    Returns
+      logger: A logging.Logger object
+    """
+    logger = logging.getLogger(name)
+    formatter = logging.Formatter(name + " - %(asctime)s - %(message)s", "%H:%M:%S")  # noqa: E501
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+
+    return logger

@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 
 # import plotly.express as px
 import streamlit as st
@@ -7,6 +8,7 @@ import streamlit as st
 from pystrava.utils import get_first_time_token, refresh_access_token_if_expired  # noqa: E501
 from pystrava.segments import sort_segments_from_activity
 from pystrava.transformations import get_segment_coordinates, get_activity_coordinates  # noqa: E501
+from pystrava.maps import create_map
 
 
 def main():
@@ -44,7 +46,7 @@ def main():
             try:
                 # Refresh tokens if expired or don't have tokens yet
                 tokens = call_refresh_access_token_if_expired(tokens)
-                print("Refreshing tokens if necessary")
+                logger.info("Refreshing tokens if necessary")
             except NameError:
                 # get tokens
                 tokens = call_get_first_time_token(CODE)  # only need to call this once!
@@ -52,7 +54,9 @@ def main():
             # display map from activity
             df_activity_coordinates = get_activity_coordinates(ACTIVITY_ID, tokens)
             st.header("Activity map")
-            st.map(df_activity_coordinates)
+            # st.map(df_activity_coordinates)
+            activity_map = create_map(df_activity_coordinates)
+            st.pydeck_chart(activity_map)
 
             # returns the sorted segments by time delta
             df_segments = call_segments_sorting(ACTIVITY_ID, tokens)
@@ -109,6 +113,8 @@ def call_segments_sorting(ACTIVITY_ID, tokens):
 GENDER = 'man'
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
+logger = logging.getLogger("pystrava")
 
 if __name__ == "__main__":
     main()

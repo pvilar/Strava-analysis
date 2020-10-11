@@ -2,10 +2,13 @@
 
 import requests
 import re
+import logging
 
 import pandas as pd
 
 from pystrava.utils import check_rate_limit_exceeded
+
+logger = logging.getLogger("pystrava")
 
 
 def sort_segments_from_activity(tokens, activity_id, gender):
@@ -15,10 +18,10 @@ def sort_segments_from_activity(tokens, activity_id, gender):
 
     # filtering 10 random segments to avoid eceeding the rate limit (remove
     # in production)
-    # df_segments = df_segments.sample(n=10)  # TODO: remove limit
+    df_segments = df_segments.sample(n=10)  # TODO: remove limit
 
     # calculate delta from leader
-    print("Sorting segments...")
+    logger.info("Sorting segments...")
     df_segments["segment_time_delta"] = df_segments.apply(
         lambda x: _calculate_time_difference_from_leader(
             x["segment.id"], x["elapsed_time"], gender=gender, tokens=tokens),
@@ -26,14 +29,14 @@ def sort_segments_from_activity(tokens, activity_id, gender):
 
     # sort dataframe
     df_segments.sort_values(by=['segment_time_delta'], inplace=True)
-    print("Sorting segments...done!")
+    logger.info("Sorting segments...done!")
 
     return df_segments
 
 
 def _get_segments_from_activity(activity_id, tokens):
 
-    print("Loading segments")
+    logger.info("Loading segments")
 
     # store URL for activities endpoint
     base_url = "https://www.strava.com/api/v3/"
@@ -49,7 +52,7 @@ def _get_segments_from_activity(activity_id, tokens):
     # check if rate limit is exceeded
     check_rate_limit_exceeded(req)
 
-    print("Segments loaded successfully")
+    logger.info("Segments loaded successfully")
 
     return pd.json_normalize(req['segment_efforts'])
 
