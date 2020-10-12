@@ -81,5 +81,6 @@ def set_logger(name: str = "pystrava") -> logging.Logger:
     handler.setFormatter(formatter)
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
+    logger.propagate = False
 
     return logger
