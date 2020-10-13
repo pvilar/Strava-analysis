@@ -63,7 +63,6 @@ def main():
 
             # returns the sorted segments by time delta
             df_segments = call_segments_sorting(ACTIVITY_ID, tokens)
-            df_segments_formatted = format_segments_table(df_segments)
 
             # TODO: format segments dataframe to show only valuable information
             # displays the segments dataframe with a checkbox to select on the
@@ -74,7 +73,7 @@ def main():
             #     range(0, int(max(df_segments['distance']))))
             # df_segments_filtered = df_segments[df_segments['distance'] >= distance]
             # df_segments_filtered = df_segments
-            st.write(df_segments_formatted)
+            st.write(format_segments_table(df_segments))
 
             # select segment to analyse
             segment_name = st.selectbox("Select a segment to visualize",
@@ -110,7 +109,8 @@ def call_refresh_access_token_if_expired(tokens):
 def call_segments_sorting(ACTIVITY_ID, tokens):
     return sort_segments_from_activity(activity_id=ACTIVITY_ID,
                                        gender=GENDER,
-                                       tokens=tokens)
+                                       tokens=tokens,
+                                       pr_filter=3)
 
 
 # General parameters

@@ -71,7 +71,7 @@ def format_segments_table(df_segments):
     ]]
 
     # rename columns
-    df_segments_formatted = df_segments_formatted.rename({
+    df_segments_formatted = df_segments_formatted.rename(columns={
         'name': "Name",
         'segment.city': "City",
         'distance': "Distance (Km)",
@@ -88,8 +88,8 @@ def format_segments_table(df_segments):
         'Distance (Km)': "{:.2f}",
         'PR rank': "{:.0f}",
         'Difference from leader': "{:.1%}",
-        'Speed (Km/h)': "{:.2f}",
-        'Leader Speed (Km/h)': "{:.2f}"
+        'Speed (Km/h)': "{:.1f}",
+        'Leader Speed (Km/h)': "{:.1f}"
     })
 
     return df_segments_formatted

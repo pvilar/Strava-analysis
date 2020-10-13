@@ -51,7 +51,7 @@ def create_map(df_coordinates: pd.DataFrame, map_style: str = 'light'):
             width_scale=40,
             width_min_pixels=1,
             get_path="path",
-            get_width=0.3,
+            get_width=0.5,
         )
     ]
 
@@ -98,7 +98,7 @@ def _get_zoom_level(lats: np.array, lons: np.array):
     sw_lat = bounds[2]
     sw_long = bounds[3]
 
-    scale = 1.3
+    scale = 1.0  # 1.5
     WORLD_DIM = {'height': 256 * scale, 'width': 256 * scale}
     ZOOM_MAX = 20
 
