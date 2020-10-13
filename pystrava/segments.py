@@ -6,7 +6,6 @@ import logging
 from datetime import timedelta
 
 import pandas as pd
-import numpy as np
 
 from pystrava.utils import check_rate_limit_exceeded
 
@@ -16,7 +15,7 @@ logger = logging.getLogger("pystrava")
 def sort_segments_from_activity(tokens,
                                 activity_id,
                                 gender='men',
-                                pr_filter=1):
+                                pr_filter=3):
 
     # get segments from activity
     df_segments = _get_segments_from_activity(activity_id, tokens)
@@ -40,12 +39,6 @@ def sort_segments_from_activity(tokens,
     df_segments["difference_from_leader"] = df_segments[
         "elapsed_time"] / df_segments["leader_time"] - 1
 
-    # select relevant columns
-    df_segments = df_segments[[
-        'name', 'segment.city', 'pr_rank', 'distance', 'elapsed_time',
-        'leader_time', 'difference_from_leader'
-    ]]
-
     # ditance to km
     df_segments['distance'] = df_segments['distance'] / 1000
 
@@ -64,18 +57,42 @@ def sort_segments_from_activity(tokens,
     # sort dataframe
     df_segments.sort_values(by=['difference_from_leader'], inplace=True)
 
-    # format columns
-    df_segments = df_segments.style.format({
-        'distance': "{:.2f}",
-        'pr_rank': "{:.0f}",
-        'difference_from_leader': "{:.1%}",
-        'speed': "{:.2f}",
-        'leader_speed': "{:.2f}"
-    })
-
     logger.info("Sorting segments...done!")
 
     return df_segments
+
+
+def format_segments_table(df_segments):
+
+    # select relevant columns
+    df_segments_formatted = df_segments[[
+        'name', 'segment.city', 'pr_rank', 'distance', 'elapsed_time',
+        'leader_time', 'difference_from_leader', 'speed', 'leader_speed'
+    ]]
+
+    # rename columns
+    df_segments_formatted = df_segments_formatted.rename({
+        'name': "Name",
+        'segment.city': "City",
+        'distance': "Distance (Km)",
+        'pr_rank': "PR rank",
+        'elapsed_time': "Elapsed Time",
+        'leader_time': "Leader Time",
+        'difference_from_leader': "Difference from leader",
+        'speed': "Speed (Km/h)",
+        'leader_speed': "Leader Speed (Km/h)"
+    })
+
+    # format columns
+    df_segments_formatted = df_segments_formatted.style.format({
+        'Distance (Km)': "{:.2f}",
+        'PR rank': "{:.0f}",
+        'Difference from leader': "{:.1%}",
+        'Speed (Km/h)': "{:.2f}",
+        'Leader Speed (Km/h)': "{:.2f}"
+    })
+
+    return df_segments_formatted
 
 
 def _get_segments_from_activity(activity_id, tokens):

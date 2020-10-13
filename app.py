@@ -6,7 +6,7 @@ import logging
 import streamlit as st
 
 from pystrava.utils import get_first_time_token, refresh_access_token_if_expired  # noqa: E501
-from pystrava.segments import sort_segments_from_activity
+from pystrava.segments import sort_segments_from_activity, format_segments_table  # noqa: E501
 from pystrava.transformations import get_segment_coordinates, get_activity_coordinates  # noqa: E501
 from pystrava.maps import create_map
 
@@ -42,17 +42,20 @@ def main():
             st.warning('Please input a valid activity id from your profile')
             # st.stop()
         else:
-            # TODO: Check if activity id is valid (trying to pull data from the activity id)
+            # TODO: Check if activity id is valid (trying to pull data
+            # from the activity id)
             try:
                 # Refresh tokens if expired or don't have tokens yet
                 tokens = call_refresh_access_token_if_expired(tokens)
                 logger.info("Refreshing tokens if necessary")
             except NameError:
                 # get tokens
-                tokens = call_get_first_time_token(CODE)  # only need to call this once!
+                tokens = call_get_first_time_token(
+                    CODE)  # only need to call this once!
 
             # display map from activity
-            df_activity_coordinates = get_activity_coordinates(ACTIVITY_ID, tokens)
+            df_activity_coordinates = get_activity_coordinates(
+                ACTIVITY_ID, tokens)
             st.header("Activity map")
             # st.map(df_activity_coordinates)
             activity_map = create_map(df_activity_coordinates, 'dark')
@@ -60,26 +63,26 @@ def main():
 
             # returns the sorted segments by time delta
             df_segments = call_segments_sorting(ACTIVITY_ID, tokens)
+            df_segments_formatted = format_segments_table(df_segments)
 
             # TODO: format segments dataframe to show only valuable information
             # displays the segments dataframe with a checkbox to select on the
             # distance of the segment
             st.header("Ranked segments by proximity to Strava leader")
-            distance = st.selectbox(
-                "Get segments above certain distance in KM:",
-                range(0, int(max(df_segments['distance'] / 1000))))
-            df_segments_filtered = df_segments[df_segments['distance'] /
-                                               1000 >= distance]
-            st.write(df_segments_filtered)
+            # distance = st.selectbox(
+            #     "Get segments above certain distance in KM:",
+            #     range(0, int(max(df_segments['distance']))))
+            # df_segments_filtered = df_segments[df_segments['distance'] >= distance]
+            # df_segments_filtered = df_segments
+            st.write(df_segments_formatted)
 
             # select segment to analyse
             segment_name = st.selectbox("Select a segment to visualize",
-                                        df_segments_filtered["name"].unique())
+                                        df_segments["name"].unique())
 
             # get segment id from name
-            segment_id = df_segments_filtered.loc[df_segments_filtered['name'] ==
-                                                  segment_name,
-                                                  'segment.id'].values[0]
+            segment_id = df_segments.loc[df_segments['name'] == segment_name,
+                                         'segment.id'].values[0]
 
             # display segment map
             df_segment_coordinates = get_segment_coordinates(

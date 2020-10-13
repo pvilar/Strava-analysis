@@ -98,7 +98,7 @@ def _get_zoom_level(lats: np.array, lons: np.array):
     sw_lat = bounds[2]
     sw_long = bounds[3]
 
-    scale = 1.5
+    scale = 1.3
     WORLD_DIM = {'height': 256 * scale, 'width': 256 * scale}
     ZOOM_MAX = 20
 
