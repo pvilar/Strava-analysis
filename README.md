@@ -1,4 +1,4 @@
-# Strava-analysis
+# Strava App
 
 ### How to run web app locally
 
