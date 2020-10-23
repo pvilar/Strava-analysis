@@ -9,6 +9,7 @@ from pystrava.utils import get_first_time_token, refresh_access_token_if_expired
 from pystrava.segments import sort_segments_from_activity, format_segments_table  # noqa: E501
 from pystrava.transformations import get_segment_coordinates, get_activity_coordinates  # noqa: E501
 from pystrava.maps import create_map
+from pystrava.plots import plot_segments_insights
 
 
 def main():
@@ -71,7 +72,7 @@ def main():
             # distance = st.selectbox(
             #     "Get segments above certain distance in KM:",
             #     range(0, int(max(df_segments['distance']))))
-            # df_segments_filtered = df_segments[df_segments['distance'] >= distance]
+            # df_segments_filtered = df_segments[df_segments['distance'] >= distance]  # noqa: E501
             # df_segments_filtered = df_segments
             st.write(format_segments_table(df_segments))
 
@@ -90,6 +91,34 @@ def main():
             # st.map(df_segment_coordinates)
             segment_map = create_map(df_segment_coordinates, 'outdoors')
             st.pydeck_chart(segment_map)
+
+            # Segment insights plots
+            st.header(
+                "How the distance of the segment impacts your proximity to the Strava leader"  # noqa: E501
+                )
+            st.plotly_chart(plot_segments_insights(df_segments,
+                                                   "segment.distance",
+                                                   "Segment Distance (m)"))
+
+            st.header(
+                "How the average grade of the segment impacts your proximity to the Strava leader"  # noqa: E501
+                )
+            st.plotly_chart(plot_segments_insights(df_segments,
+                                                   "segment.average_grade",
+                                                   "Average grade (%)"))
+
+            st.header(
+                "How the elevation difference of the segment impacts your proximity to the Strava leader"  # noqa: E501
+                )
+            st.plotly_chart(plot_segments_insights(df_segments,
+                                                   "elevation_difference",
+                                                   "Elevation Difference (m)"))
+            st.header(
+                "How the average power varies with the proximity to the Strava leader"  # noqa: E501
+                )
+            st.plotly_chart(plot_segments_insights(df_segments,
+                                                   "average_watts",
+                                                   "Average Power (W)"))
 
 
 @st.cache
@@ -110,7 +139,7 @@ def call_segments_sorting(ACTIVITY_ID, tokens):
     return sort_segments_from_activity(activity_id=ACTIVITY_ID,
                                        gender=GENDER,
                                        tokens=tokens,
-                                       pr_filter=3)
+                                       pr_filter=None)
 
 
 # General parameters
