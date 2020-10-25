@@ -6,6 +6,7 @@ import logging
 from datetime import timedelta
 
 import pandas as pd
+import numpy as np
 
 from pystrava.utils import check_rate_limit_exceeded
 
@@ -15,14 +16,14 @@ logger = logging.getLogger("pystrava")
 def sort_segments_from_activity(tokens,
                                 activity_id,
                                 gender='men',
-                                pr_filter=3):
+                                pr_filter=1):
 
     # get segments from activity
     df_segments = _get_segments_from_activity(activity_id, tokens)
 
     # filtering 10 random segments to avoid eceeding the rate limit (remove
     # in production)
-    # df_segments = df_segments.sample(n=20)  # TODO: remove limit
+    df_segments = df_segments.sample(n=20)  # TODO: remove limit
 
     # filter by PR (3, 2, 1)
     if pr_filter in [1, 2, 3]:
@@ -57,6 +58,19 @@ def sort_segments_from_activity(tokens,
     # sort dataframe
     df_segments.sort_values(by=['difference_from_leader'], inplace=True)
 
+    # calculate elevation difference
+    df_segments['elevation_difference'] = np.where(
+        df_segments['segment.average_grade'] > 0,
+        df_segments['segment.elevation_high'] -
+        df_segments['segment.elevation_low'],
+        -(df_segments['segment.elevation_high'] -
+          df_segments['segment.elevation_low']))
+
+    # calculate type of terrain
+    df_segments['terrain'] = df_segments.apply(lambda x: calculate_terrain(
+        grade=x['segment.average_grade'], elv_diff=x['elevation_difference']),
+                                            axis=1)
+
     logger.info("Sorting segments...done!")
 
     return df_segments
@@ -86,7 +100,7 @@ def format_segments_table(df_segments):
     # format columns
     df_segments_formatted = df_segments_formatted.style.format({
         'Distance (Km)': "{:.2f}",
-        'PR rank': "{:.0f}",
+        'PR rank': "{}",
         'Difference from leader': "{:.1%}",
         'Speed (Km/h)': "{:.1f}",
         'Leader Speed (Km/h)': "{:.1f}"
@@ -159,3 +173,20 @@ def _get_time_from_leader(segment_id, athlete_elapsed_time,
             req['xoms']['kom'])
 
     return leader_elapsed_time
+
+
+def calculate_terrain(grade,
+                      elv_diff,
+                      grade_threshold=1,
+                      elv_diff_threshold=20):
+
+    if grade >= grade_threshold and elv_diff >= elv_diff_threshold:
+        terrain = 'uphill'
+    elif grade <= -grade_threshold and elv_diff <= elv_diff_threshold:
+        terrain = 'downhill'
+    elif -grade_threshold <= grade <= grade_threshold and -elv_diff_threshold <= elv_diff <= elv_diff_threshold:
+        terrain = 'flat'
+    else:
+        terrain = 'other'
+
+    return terrain
