@@ -98,7 +98,14 @@ def main():
                 )
             st.plotly_chart(plot_segments_insights(df_segments,
                                                    "segment.distance",
-                                                   "Segment Distance (m)"))
+                                                   "Segment Distance (Km)"))
+
+            st.header(
+                "How the distance of the segment impacts your proximity to the Strava leader"  # noqa: E501
+                )
+            st.plotly_chart(plot_segments_insights(df_segments,
+                                                   "elapsed_time",
+                                                   "Time (hh:mm:ss)"))
 
             st.header(
                 "How the average grade of the segment impacts your proximity to the Strava leader"  # noqa: E501
@@ -144,7 +151,7 @@ def call_segments_sorting(ACTIVITY_ID, tokens):
 
 # General parameters
 # ACTIVITY_ID = '4074378152'
-GENDER = 'man'
+GENDER = 'man'  # TODO: add to app as a checkbox or similar
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
