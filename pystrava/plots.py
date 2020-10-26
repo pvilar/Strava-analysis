@@ -22,13 +22,15 @@ def plot_segments_insights(data, y, ylabel, title=None):
                      y=y,
                      color='terrain',
                      labels={
-                         "difference_from_leader": "Percent Difference from Leader",
+                         "difference_from_leader":
+                         "Percent Difference from Leader",
                          y: ylabel,
                          "terrain": "Terrain type"
                      },
                      title=title,
                      hover_data=["name"])
-    fig.update_xaxes(range=[0, None], tickformat='%')
+    fig.update_xaxes(range=[0, min(200, max(data["difference_from_leader"]))],
+                     tickformat='%')
 
     if y == "elapsed_time":
         fig.update_yaxes(tickformat="%H:%M:%S")
