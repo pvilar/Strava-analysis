@@ -29,7 +29,7 @@ def plot_segments_insights(data, y, ylabel, title=None):
                      },
                      title=title,
                      hover_data=["name"])
-    fig.update_xaxes(range=[0, min(200, max(data["difference_from_leader"]))],
+    fig.update_xaxes(range=[0, min(2, max(data["difference_from_leader"]))],
                      tickformat='%')
 
     if y == "elapsed_time":
