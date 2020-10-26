@@ -23,7 +23,7 @@ def sort_segments_from_activity(tokens,
 
     # filtering 10 random segments to avoid eceeding the rate limit (remove
     # in production)
-    df_segments = df_segments.sample(n=20)  # TODO: remove limit
+    # df_segments = df_segments.sample(n=20)  # TODO: remove limit
 
     # filter by PR (3, 2, 1)
     if pr_filter in [1, 2, 3]:
