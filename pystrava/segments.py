@@ -23,7 +23,7 @@ def sort_segments_from_activity(tokens,
 
     # filtering 10 random segments to avoid eceeding the rate limit (remove
     # in production)
-    # df_segments = df_segments.sample(n=20)  # TODO: remove limit
+    df_segments = df_segments.sample(n=20)  # TODO: remove limit
 
     # filter by PR (3, 2, 1)
     if pr_filter in [1, 2, 3]:
@@ -41,7 +41,7 @@ def sort_segments_from_activity(tokens,
         "elapsed_time"] / df_segments["leader_time"] - 1
 
     # ditance to km
-    df_segments['distance'] = df_segments['distance'] / 1000
+    df_segments['distance'] = df_segments['distance']  # / 1000
 
     # calculate speeds
     df_segments['speed'] = df_segments['distance'] / (
