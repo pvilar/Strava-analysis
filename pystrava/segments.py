@@ -15,19 +15,26 @@ logger = logging.getLogger("pystrava")
 
 def sort_segments_from_activity(tokens,
                                 activity_id,
-                                gender='men',
-                                pr_filter=1):
+                                gender,
+                                filter_type,
+                                pr_filter=None):
 
     # get segments from activity
     df_segments = _get_segments_from_activity(activity_id, tokens)
+    logger.info(f"The activity contains {df_segments.shape[0]} segments.")
 
-    # filtering 10 random segments to avoid eceeding the rate limit (remove
-    # in production)
-    df_segments = df_segments.sample(n=20)  # TODO: remove limit
+    # filtering only categorized climbs if avtivity is Ride
+    if filter_type == 'climbs' and df_segments[
+            'segment.activity_type'].value_counts().index[0] == 'Ride':
+        df_segments = df_segments[df_segments['segment.climb_category'] > 0]
+    else:
+        df_segments = df_segments.sample(n=30)
 
     # filter by PR (3, 2, 1)
     if pr_filter in [1, 2, 3]:
         df_segments = df_segments[df_segments['pr_rank'] <= pr_filter]
+
+    logger.info(f"There are {df_segments.shape[0]} segments selected.")
 
     # calculate delta from leader
     logger.info("Sorting segments...")
@@ -41,7 +48,7 @@ def sort_segments_from_activity(tokens,
         "elapsed_time"] / df_segments["leader_time"] - 1
 
     # ditance to km
-    df_segments['distance'] = df_segments['distance']  # / 1000
+    df_segments['distance'] = df_segments['distance'] / 1000
 
     # calculate speeds
     df_segments['speed'] = df_segments['distance'] / (
@@ -69,7 +76,7 @@ def sort_segments_from_activity(tokens,
     # calculate type of terrain
     df_segments['terrain'] = df_segments.apply(lambda x: calculate_terrain(
         grade=x['segment.average_grade'], elv_diff=x['elevation_difference']),
-                                            axis=1)
+                                               axis=1)
 
     logger.info("Sorting segments...done!")
 
@@ -82,28 +89,34 @@ def format_segments_table(df_segments):
     df_segments_formatted = df_segments[[
         'name', 'segment.city', 'pr_rank', 'distance', 'elapsed_time',
         'leader_time', 'difference_from_leader', 'speed', 'leader_speed'
-    ]]
+    ]].reset_index(drop=True)
 
     # rename columns
-    df_segments_formatted = df_segments_formatted.rename(columns={
-        'name': "Name",
-        'segment.city': "City",
-        'distance': "Distance (Km)",
-        'pr_rank': "PR rank",
-        'elapsed_time': "Elapsed Time",
-        'leader_time': "Leader Time",
-        'difference_from_leader': "Difference from leader",
-        'speed': "Speed (Km/h)",
-        'leader_speed': "Leader Speed (Km/h)"
-    })
+    df_segments_formatted = df_segments_formatted.rename(
+        columns={
+            'name': "Name",
+            'segment.city': "City",
+            'distance': "Distance (Km)",
+            'pr_rank': "PR rank",
+            'elapsed_time': "Elapsed Time",
+            'leader_time': "Leader Time",
+            'difference_from_leader': "Difference from leader",
+            'speed': "Speed (Km/h)",
+            'leader_speed': "Leader Speed (Km/h)"
+        })
 
     # format columns
     df_segments_formatted = df_segments_formatted.style.format({
-        'Distance (Km)': "{:.2f}",
-        'PR rank': "{}",
-        'Difference from leader': "{:.1%}",
-        'Speed (Km/h)': "{:.1f}",
-        'Leader Speed (Km/h)': "{:.1f}"
+        'Distance (Km)':
+        "{:.2f}",
+        'PR rank':
+        "{}",
+        'Difference from leader':
+        "{:.1%}",
+        'Speed (Km/h)':
+        "{:.1f}",
+        'Leader Speed (Km/h)':
+        "{:.1f}"
     })
 
     return df_segments_formatted
@@ -146,8 +159,7 @@ def _get_sec(time_str):
         return [int(s) for s in re.findall(r'-?\d+\.?\d*', time_str)][0]
 
 
-def _get_time_from_leader(segment_id, athlete_elapsed_time,
-                          gender, tokens):
+def _get_time_from_leader(segment_id, athlete_elapsed_time, gender, tokens):
     """
     Gets the time of the segment's leader in seconds and calculates
     the percent difference from the anthlete time
