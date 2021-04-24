@@ -62,17 +62,18 @@ def main():
             activity_map = create_map(df_activity_coordinates, 'dark')
             st.pydeck_chart(activity_map)
 
-            # add GENDER filter
-
-            # add segments type filter (climbs, remove short segments,
-            # remove long segments, downhill)
-
-            # add PR filter
+            # TODO: add segments type filter (gender, climbs, remove short
+            # segments, remove long segments, downhill)
 
             # returns the sorted segments by time delta
             filter_type = 'climbs'
             GENDER = 'mens'
-            df_segments = call_segments_sorting(tokens, ACTIVITY_ID, GENDER, filter_type)
+            pr_filter = None
+            df_segments = call_segments_sorting(tokens=tokens,
+                                                activity_id=ACTIVITY_ID,
+                                                gender=GENDER,
+                                                filter_type=filter_type,
+                                                pr_filter=pr_filter)
 
             # TODO: format segments dataframe to show only valuable information
             # displays the segments dataframe with a checkbox to select on the
@@ -104,37 +105,37 @@ def main():
             # Segment insights plots
             st.header(
                 "How the distance of the segment impacts your proximity to the Strava leader"  # noqa: E501
-                )
-            st.plotly_chart(plot_segments_insights(df_segments,
-                                                   "segment.distance",
-                                                   "Segment Distance (Km)"))
+            )
+            st.plotly_chart(
+                plot_segments_insights(df_segments, "segment.distance",
+                                       "Segment Distance (Km)"))
 
             st.header(
                 "How the distance of the segment impacts your proximity to the Strava leader"  # noqa: E501
-                )
-            st.plotly_chart(plot_segments_insights(df_segments,
-                                                   "elapsed_time",
-                                                   "Time (hh:mm:ss)"))
+            )
+            st.plotly_chart(
+                plot_segments_insights(df_segments, "elapsed_time",
+                                       "Time (hh:mm:ss)"))
 
             st.header(
                 "How the average grade of the segment impacts your proximity to the Strava leader"  # noqa: E501
-                )
-            st.plotly_chart(plot_segments_insights(df_segments,
-                                                   "segment.average_grade",
-                                                   "Average grade (%)"))
+            )
+            st.plotly_chart(
+                plot_segments_insights(df_segments, "segment.average_grade",
+                                       "Average grade (%)"))
 
             st.header(
                 "How the elevation difference of the segment impacts your proximity to the Strava leader"  # noqa: E501
-                )
-            st.plotly_chart(plot_segments_insights(df_segments,
-                                                   "elevation_difference",
-                                                   "Elevation Difference (m)"))
+            )
+            st.plotly_chart(
+                plot_segments_insights(df_segments, "elevation_difference",
+                                       "Elevation Difference (m)"))
             st.header(
                 "How the average power varies with the proximity to the Strava leader"  # noqa: E501
-                )
-            st.plotly_chart(plot_segments_insights(df_segments,
-                                                   "average_watts",
-                                                   "Average Power (W)"))
+            )
+            st.plotly_chart(
+                plot_segments_insights(df_segments, "average_watts",
+                                       "Average Power (W)"))
 
 
 @st.cache
@@ -151,12 +152,12 @@ def call_refresh_access_token_if_expired(tokens):
 # module. In order to apply the cache option, the function that loads the data
 # needs to be defined in this script (so it's a workaround to use sort_segments_from_activity() cached  # noqa: E302, E501
 @st.cache
-def call_segments_sorting(tokens, ACTIVITY_ID, GENDER, filter_type):
+def call_segments_sorting(tokens, activity_id, gender, filter_type, pr_filter):
     return sort_segments_from_activity(tokens=tokens,
-                                       activity_id=ACTIVITY_ID,
-                                       gender=GENDER,
+                                       activity_id=activity_id,
+                                       gender=gender,
                                        filter_type=filter_type,
-                                       pr_filter=None)
+                                       pr_filter=pr_filter)
 
 
 # General parameters

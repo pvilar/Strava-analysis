@@ -23,8 +23,11 @@ def sort_segments_from_activity(tokens,
     df_segments = _get_segments_from_activity(activity_id, tokens)
     logger.info(f"The activity contains {df_segments.shape[0]} segments.")
 
+    # check the number of climb segments
+    n_segments_climb = (df_segments['segment.climb_category'] > 0).sum()
+
     # filtering only categorized climbs if avtivity is Ride
-    if filter_type == 'climbs' and df_segments[
+    if n_segments_climb > 0 and filter_type == 'climbs' and df_segments[
             'segment.activity_type'].value_counts().index[0] == 'Ride':
         df_segments = df_segments[df_segments['segment.climb_category'] > 0]
     else:
@@ -40,7 +43,7 @@ def sort_segments_from_activity(tokens,
     logger.info("Sorting segments...")
     df_segments["leader_time"] = df_segments.apply(
         lambda x: _get_time_from_leader(
-            x["segment.id"], x["elapsed_time"], gender=gender, tokens=tokens),
+            x["segment.id"], gender=gender, tokens=tokens),
         axis=1)
 
     # time delta
@@ -159,32 +162,37 @@ def _get_sec(time_str):
         return [int(s) for s in re.findall(r'-?\d+\.?\d*', time_str)][0]
 
 
-def _get_time_from_leader(segment_id, athlete_elapsed_time, gender, tokens):
+def _get_time_from_leader(segment_id, gender, tokens):
     """
     Gets the time of the segment's leader in seconds and calculates
     the percent difference from the anthlete time
     """
+    try:
+        # store URL for activities endpoint
+        base_url = "https://www.strava.com/api/v3/"
+        endpoint = "segments/{}".format(segment_id)
+        url = base_url + endpoint
 
-    # store URL for activities endpoint
-    base_url = "https://www.strava.com/api/v3/"
-    endpoint = "segments/{}".format(segment_id)
-    url = base_url + endpoint
+        # define headers and parameters for request
+        headers = {"Authorization": "Bearer {}".format(tokens["access_token"])}
 
-    # define headers and parameters for request
-    headers = {"Authorization": "Bearer {}".format(tokens["access_token"])}
+        # make GET request to Strava API
+        req = requests.get(url, headers=headers).json()
 
-    # make GET request to Strava API
-    req = requests.get(url, headers=headers).json()
+        # check if rate limit is exceeded
+        check_rate_limit_exceeded(req)
 
-    # check if rate limit is exceeded
-    check_rate_limit_exceeded(req)
+        # get leader time
+        leader_elapsed_time = _get_sec(
+            req['xoms']['qom']) if gender == 'women' else _get_sec(
+                req['xoms']['kom'])
 
-    # get leader time
-    leader_elapsed_time = _get_sec(
-        req['xoms']['qom']) if gender == 'women' else _get_sec(
-            req['xoms']['kom'])
+        return leader_elapsed_time
 
-    return leader_elapsed_time
+    except Exception:
+        logger.info(f"Couldn't retrieve the leader elapsed time for the following segment: {segment_id}")  # noqa: E501
+
+        return 0
 
 
 def calculate_terrain(grade,
