@@ -3,7 +3,6 @@
 import logging
 
 import pandas as pd
-import numpy as np
 import plotly.express as px
 
 logger = logging.getLogger("pystrava")
@@ -14,8 +13,8 @@ def plot_segments_insights(data, y, ylabel, title=None):
     if y == "elapsed_time":
         data['elapsed_time'] = pd.to_datetime(data['elapsed_time'])
 
-    elif y == "segment.distance":
-        data["segment.distance"] = np.round(data["segment.distance"] / 1000, 2)
+    # elif y == "segment.distance":
+    #     data["segment.distance"] = np.round(data["segment.distance"] / 1000, 2)
 
     fig = px.scatter(data,
                      x="difference_from_leader",
