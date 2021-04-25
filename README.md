@@ -1,4 +1,4 @@
-# Strava App
+# SegmentBreaker
 
 This application allows you to quickly analyse how close you were to the segment leaders from one activity of your choice. The application is going to rank the segments from your activity based on the difference between your time and the leader's time, so that the segments where your time was closest to the leader's are going to be at the top of the list.
 
