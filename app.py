@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import copy
 
 # import plotly.express as px
 import streamlit as st
@@ -69,11 +70,12 @@ def main():
             filter_type = 'climbs'
             GENDER = 'mens'
             pr_filter = None
-            df_segments = call_segments_sorting(tokens=tokens,
-                                                activity_id=ACTIVITY_ID,
-                                                gender=GENDER,
-                                                filter_type=filter_type,
-                                                pr_filter=pr_filter)
+            df_segments = copy.deepcopy(
+                call_segments_sorting(tokens=tokens,
+                                      activity_id=ACTIVITY_ID,
+                                      gender=GENDER,
+                                      filter_type=filter_type,
+                                      pr_filter=pr_filter))
 
             # TODO: format segments dataframe to show only valuable information
             # displays the segments dataframe with a checkbox to select on the
@@ -150,7 +152,8 @@ def call_refresh_access_token_if_expired(tokens):
 
 # This functions calls the function that sorts the segments from the pystrava
 # module. In order to apply the cache option, the function that loads the data
-# needs to be defined in this script (so it's a workaround to use sort_segments_from_activity() cached  # noqa: E302, E501
+# needs to be defined in this script (so it's a workaround to use
+# sort_segments_from_activity() cached
 @st.cache
 def call_segments_sorting(tokens, activity_id, gender, filter_type, pr_filter):
     return sort_segments_from_activity(tokens=tokens,
