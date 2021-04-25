@@ -22,8 +22,10 @@ def main():
     st.markdown(
         "Click on the following link in order to authorise SegmentBreaker to connect to your Strava"  # noqa: E501
     )
-    url_oauth = 'https://www.strava.com/oauth/authorize?client_id=%2053827&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=profile:read_all,activity:read_all'  # noqa: E501
-    st.markdown(url_oauth)
+    st.markdown(
+        """<a style='display: block; text-align: center;' href="https://www.strava.com/oauth/authorize?client_id=%2053827&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=profile:read_all,activity:read_all" target="_blank">AUTHORIZATION LINK</a>""",  # noqa: E501
+        unsafe_allow_html=True,  # when set to True, the url is opened in the same tab  # noqa: E501
+    )
 
     # Text box to input URL from auth
     oauth_response = st.text_input(
